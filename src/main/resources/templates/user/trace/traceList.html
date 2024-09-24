@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+<head>
+  <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <!-- Custom styles for this template-->
+  <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="body-container row">
+      <div class="left-area col-sm-2"></div>
+      <div class="trace-list-area col-sm-8">
+        <div class="dropdown">
+          <button type="button" class="btn btn-dark dropdown-toggle" data-toggle="dropdown">
+            글 목록 유형 변경
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" th:href="@{./list(mode=0)}">Todo</a>
+            <a class="dropdown-item" th:href="@{./list(mode=1)}">Post</a>
+          </div>
+        </div>
+        <h2>전체 글</h2>
+        <table class="table table-bordered">
+          <thead>
+            <tr role="row">
+              <th>유형</th>
+              <th>콘텐트</th>
+              <th>유저</th>
+              <th>작성시기</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="trace : ${traceDtoList}">
+              <div th:if="${trace.todo}">
+                <td><button class="btn btn-dark">Todo</button></td>
+                <td th:value="${trace.todo.getUser().getUsername()}" class="redirect-td"><p th:text="${trace.todo.getContent()}"></p></td>
+                <td th:value="${trace.todo.getUser().getUsername()}" class="redirect-td"><p th:text="${trace.todo.getUser().getUsername()}"></p></td>
+                <td><p th:text="${trace.time}" th:title="${trace.todo.getCreatedDate()}"></p></td>
+              </div>
+
+              <div th:unless="${trace.todo}">
+                <td><button class="btn btn-dark">Post</button></td>
+                <td th:value="${trace.post.getUser().getUsername()}" class="redirect-td"><p th:text="${trace.post.getTitle()}"></p></td>
+                <td th:value="${trace.post.getUser().getUsername()}" class="redirect-td"><p th:text="${trace.post.getUser().getUsername()}"></p></td>
+                <td><p th:text="${trace.time}" th:title="${trace.post.getCreatedDate()}"></p></td>
+              </div>
+
+            </tr>
+          </tbody>
+        </table>
+        <div class="right-area col-sm-2"></div>
+      </div>
+    </div>
+    <ul class="pagination justify-content-center">
+      <li th:each="btn : ${pageBtnList}" class="page-item"><a class="page-link bg-dark text-white"  th:onclick="|paging(${btn},${mode})|" th:text="${btn}"></a></li>
+    </ul>
+  </div>
+
+
+</body>
+<script>
+  function paging(btn,mode){
+    location.href = `./list?page=${btn}&mode=${mode}`;
+  }
+  let redirectTds = $(".redirect-td");
+  for (const redirectTd of redirectTds) {
+    let username = redirectTd.getAttribute("value");
+    redirectTd.onclick = function (e){
+      location.href = `/user/trace/${username}`;
+    }
+    redirectTds.css("cursor","pointer");
+  }
+</script>
+</html>

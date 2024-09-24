@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="header.html">
+</head>
+<head>
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <h2>
+        <a class="nav-link" th:text="${community.getName()}" th:href="|/community/${community.url}|"></a>
+    </h2>
+
+    <div class="board-page">
+        <div class="board-title">
+            <p th:text="${board.getTitle()}"></p>
+        </div>
+        <div class="board-content">
+            <div id="content" th:utext="${board.getContent()}">
+            </div>
+        </div>
+
+        <form id="deleteBoardForm" th:action="|${board.id}/delete|">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        </form>
+
+        <div class="text-right" th:if="${#authentication.name == board.username} ">
+            <button id="deleteBtn" class="btn btn-dark">삭제</button>
+            <a class="btn btn-dark" id="" th:href="|${board.id}/modify|">수정</a>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-dark" th:text="|👍 ${board.likeCount}|" th:onclick="|boardIndex.boardReaction(${board.id},true)|"></button>
+            <button class="btn btn-dark" th:text="|👎 ${board.dislike}|" th:onclick="|boardIndex.boardReaction(${board.id},false)|"></button>
+        </div>
+
+
+
+    </div>
+
+    <!-- 댓글 출력 -->
+    <div class="comment-area">
+        <div class="row" th:each="comment : ${board.commentList}" th:id="|comment-area-${comment.id}|">
+            <div class="col-sm-1">
+                <img class="card-img-top rounded-circle" style="width: 50px;height: 50px;" th:src="'/get.cf?fileName=' + ${comment.getWriteUserProfileImgSrc() == null ? 'default-profile.jpg' : comment.getWriteUserProfileImgSrc() } ">
+            </div>
+            <div class="col-sm-10 row">
+                <a class="col-sm-1 text-dark" th:href="|/user/trace/${comment.writeUsername}|" th:text="${comment.writeUsername}"></a>
+                <div class="col-sm-11"></div>
+                <div class="col-sm-12" th:id="|comment-text-area-${comment.id}|">
+                    <p th:text="${comment.text}" th:id="|comment-text-${comment.id}|"></p>
+                </div>
+            </div>
+
+            <div th:id="|comment-edit-btn-${comment.id}|"></div>
+
+            <!-- 수정 버튼 -->
+            <div class="col-sm-1">
+                <div th:id="|edit-btn-${comment.id}|" th:if="${(comment.writeUsername == #authentication.name) || (comment.pageOwnerUsername == #authentication.name)} ">
+                    <div class=" align-items-center justify-content-between">
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">수정</div>
+                                <button class="dropdown-item" th:onclick="|commentEditFrontIndex.toggleEdit(${comment.id})|">댓글 수정하기</button>
+                                <button class="dropdown-item" th:onclick="|commentIndex.delete(${comment.id})|">댓글 삭제하기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 댓글 작성 -->
+    <div sec:authorize="isAuthenticated()">
+        <div class="comment-write-area mt-4">
+            <div class="form-group" id="todo-area">
+                <textarea type="text" minlength="2" maxlength="1000" class="form-control" name="content" id="comment-text" placeholder="댓글을 작성해주세요"></textarea>
+                <div id="text-limit-view" class="row ml-3">
+                    <p class="float-left" id="cur-text-size">0</p>
+                    <p class="float-left text-right" id="max-text-size">/ 1000</p>
+                </div>
+                <button class="btn btn-dark float-right" th:onclick="|commentIndex.add(${board.id})|">댓글 작성</button>
+            </div>
+        </div>
+    </div>
+    <div sec:authorize="!isAuthenticated()" class="text-center">
+        <button class="btn btn-dark" onclick="location.href='/user/login'">댓글을 작성할려면 로그인해주세요</button>
+    </div>
+
+    <div class="pt-4" th:replace="fragment/boardCommunityPaging"></div>
+
+</div>
+
+
+</body>
+
+<script>
+    let commentEditFrontIndex;
+    let commentIndex;
+    let boardIndex;
+    let pageOwnerUsername = null;
+</script>
+<script src="/js/bundle/indexBoardPage.bundle.js">
+</script>
+
+<script src="/js/Community/board.js"></script>
+<script src="/js/Front/TraceWriteFront.js"></script>
+
+</html>

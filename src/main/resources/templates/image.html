@@ -1,0 +1,82 @@
+<!--<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">-->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="_csrf" th:content="${_csrf.token}" />
+	<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+	<title>Daum에디터 - 이미지 첨부</title>
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>	<script  src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.js"></script>
+	<script src="/daumeditor/js/popup.js" type="text/javascript" charset="utf-8"></script>
+
+
+
+</head>
+<div class="wrapper">
+	<div class="header">
+		<h1>사진 첨부</h1>
+	</div>
+	<div class="body">
+		<dl class="alert">
+			<dt>사진 첨부 확인</dt>
+			<dd>
+				<form id="frm" action="/API/img/" method="post">
+					<input type="hidden"  th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+					<input type="file" name="imgList" multiple="multiple">
+				</form>
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<ul>
+			<li class="submit"><a href="#" id="saveBtn" title="등록" class="btnlink">등록</a> </li>
+			<li class="cancel"><a href="#" onclick="closeWindow();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		$("#saveBtn").click(function(){
+			$("#frm").submit();
+		})
+		//ajax form submit
+		$('#frm').ajaxForm({
+			beforeSubmit: function (data,form,option) {
+				//validation체크
+				//막기위해서는 return false를 잡아주면됨
+				return true;
+			},
+			success: function(response,status){
+				//성공후 서버에서 받은 데이터 처리
+				done(response);
+			},
+			error: function(error){
+				//에러발생을 위한 code페이지
+				alert(error);
+				console.log(error);
+			}
+		});
+	})
+	function done(response) {
+		console.log(response);
+		if (typeof(execAttach) == 'undefined') { //Virtual Function
+			return;
+		}
+		var response_object = $.parseJSON( response );
+		console.log(response_object);
+		execAttach(response_object);
+		closeWindow();
+	}
+
+	function initUploader(){
+		var _opener = PopupUtil.getOpener();
+		if (!_opener) {
+			alert('잘못된 경로로 접근하셨습니다.');
+			return;
+		}
+
+		var _attacher = getAttacher('image', _opener);
+		registerAction(_attacher);
+	}
+</script>
+
+</html>

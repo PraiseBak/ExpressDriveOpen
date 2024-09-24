@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+<body>
+<div class="container mt-2 text-center" >
+  <div class="table-responsive">
+    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+      <thead>
+      <tr>
+        <th>이미지</th>
+        <th>아이디</th>
+        <th>이메일</th>
+        <th>글 작성 수</th>
+        <th></th>
+
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="u : ${userList}">
+        <td>
+          <img class="card-img-top rounded-circle"  style="width: 50px;height: 50px;" th:src="|/get.cf?fileName=${u.profileImgSrc}|">
+        </td>
+        <td th:text="${u.username}"></td>
+        <td th:text="${u.email}"></td>
+        <td th:text="${u.traceCount}"></td>
+        <td><button class="btn btn-dark">승격</button></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</div>
+
+</body>
+</html>

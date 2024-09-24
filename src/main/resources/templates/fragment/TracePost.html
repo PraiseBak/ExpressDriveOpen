@@ -1,0 +1,55 @@
+<div th:if="${posts.size >= 1}">
+  <h2 class="text-center mt-4">작성글</h2>
+  <hr>
+  <div class="post-area row bg-gray-200 border rounded mt-4" th:each="post :  ${posts}">
+    <div class="col-sm-1">
+      <span>📝</span>
+    </div>
+    <div class="col-sm-10">
+      <p th:id="${post.id}+'-title'" th:text="${post.title}" name="title"></p>
+      <div class="float-right"><label th:for="${post.id}+'-modifiedDate'"
+                                      th:if="${post.modifiedDate != post.createdDate}">수정된 날짜 </label>
+        <small th:id="${post.id}+'-modifiedDate'"
+               th:text="${#temporals.format(post.modifiedDate, 'yyyy-MM-dd')}"
+               th:if="${post.modifiedDate != post.createdDate}"></small></div>
+
+
+      <div th:if="${post.content.length() > 100}">
+                            <pre th:id="'p-' + ${post.id}+'-content'"
+                                 th:text="${#strings.substring(post.content, 0, 100)}"></pre>
+        <p hidden="" th:id="|p-full-text-${post.id}|" th:text="${post.content}"></p>
+
+        <a th:id="|view-more-${post.id}|" class="float-right mb-2"
+           th:onclick="|viewMore(${post.id},'p')|" role="button">
+          <i class='fas fa-sort-down text-gray-400'> 더보기</i>
+        </a>
+      </div>
+
+      <pre th:unless="${post.content.length() > 100}" th:id="'p-' + ${post.id}+'-content'"
+           th:text="${post.content}"></pre>
+      <img class="mx-auto d-block" th:if="${post.imgSrc}" style="width: 200;height: 200px;"
+           th:src="|/get.cf?fileName=${post.imgSrc}|">
+
+    </div>
+    <div class="col-sm-1" th:if="${owner == #authentication.name} ">
+      <div class=" align-items-center justify-content-between">
+        <div class="dropdown no-arrow">
+          <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+               aria-labelledby="dropdownMenuLink">
+            <div class="dropdown-header">수정</div>
+            <button class="dropdown-item"
+                    th:onclick="|location.href='@{trace/update(mode=1,id=${post.id})}'|">내용 수정하기
+            </button>
+            <button class="dropdown-item"
+                    th:onclick="'traceRemoveIndex.remove(1,' + ${post.id} +')' ">포스트 삭제하기
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

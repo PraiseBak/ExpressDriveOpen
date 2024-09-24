@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+<head>
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <h2 th:text="${community.name}"></h2>
+
+    <div class="body-container row">
+
+        <table class="table table-bordered" th:if="${boardList}">
+            <thead>
+            <tr role="row">
+                <th>제목</th>
+                <th>유저</th>
+                <th>작성시기</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="board : ${boardList}">
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${board.getTitle()}"></p></td>
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${board.getUsername()}"></p></td>
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${#temporals.format(board.modifiedDate, 'yyyy-MM-dd')}"></p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <ul class="pagination justify-content-center"><li th:each="btn : ${pageBtnList}" class="page-item"><a class="page-link bg-dark text-white"  th:onclick="|paging(${btn})|" th:text="${btn}"></a></li></ul>
+    <a class="btn btn-dark" th:href="|${community.getUrl()}/write|">글쓰기</a>
+
+
+</div>
+
+
+</body>
+<script th:inline="javascript">
+    var community = /*[[${community.getUrl()}]]*/;
+    function paging(btn){
+        location.href = `./${community}?page=${btn}`;
+    }
+
+    let redirectTds = $(".redirect-td");
+    for (const redirectTd of redirectTds) {
+        let boardId = redirectTd.getAttribute("value");
+        redirectTd.onclick = function (e){
+            location.href = `/community/${community}/${boardId}`;
+        }
+        redirectTds.css("cursor","pointer");
+    }
+
+</script>
+</html>

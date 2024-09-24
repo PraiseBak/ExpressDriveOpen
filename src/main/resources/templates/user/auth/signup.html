@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+
+<body>
+
+
+<form class="form-group" method="post" onsubmit="return (auth.signup())">
+
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <div class="form-group">
+        <div id="username-area">
+            <label for="username">유저네임</label>
+            <input type="text" class="form-control" name="username" id="username" aria-describedby="유저네임">
+            <p class="msg"></p>
+        </div>
+        <div id="password-area">
+            <label for="password">패스워드</label>
+            <input type="password" class="form-control" name="password" id="password" aria-describedby="비밀번호">
+            <p class="msg"></p>
+        </div>
+        <div id="email-area">
+            <label for="email">이메일</label>
+            <input type="email" class="form-control" name="email" id="email" aria-describedby="이메일">
+            <p id="msg"></p>
+        </div>
+
+        <div class="interest-select">
+            <label for="interest-select">주요 관심사 3개를 선택해주세요</label>
+            <br>
+            <select id="interest-select" name="interests" onchange="interestAddManage(this);">
+                <option value="-1">관심사 선택</option>
+                <div th:each="interest : ${interestEnumList}" >
+                    <option th:value="${interest.code}"  th:text="${interest.str}"></option>
+                </div>
+            </select>
+        </div>
+
+        <div class="interest-area" id="interest-area-0">
+        </div>
+
+        <button id="signupBtn">회원가입</button>
+        <!--/*@thymesVar id="error" type="com.pb.expressdrive.Helpe(r).Error.InternalServerError"*/-->
+        <p th:if="${error}" id="errorMsg" th:text="${error?.getMsg()}"></p>
+    </div>
+
+</form>
+
+</body>
+
+<script src="/js/ValidCheck/user.js"></script>
+<script src="/js/ValidCheck/validCheck.js"></script>
+<script src="/js/User/Interest.js"></script>
+<script>
+    let usernameDiv = "username-area";
+    let emailDiv = "email-area";
+    let passwordDiv = "password-area";
+    let usernameInputCheck = new UserValidCheck(usernameDiv,"숫자 혹은 영문 8 - 16자를 입력해주세요","",0, /^[A-Za-z0-9]{8,16}$/);
+    let emailInputCheck = new UserValidCheck( emailDiv,"올바르지 않은 이메일입니다","",1,/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/);
+    let passwordInputCheck = new UserValidCheck(passwordDiv,"영문, 숫자, 특수기호 조합으로 8-16자를 입력해주세요","",2,  /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/);
+    let usernameDupliCheck = new UserDuplicateCheck(usernameDiv,"사용중인 유저네임입니다","사용가능한 유저네임입니다",0);
+    let emailDupliCheck = new UserDuplicateCheck(emailDiv,"사용중인 이메일입니다","사용가능한 이메일입니다",1);
+
+    $("#username").blur(function (event) {
+        if(usernameInputCheck.checkValid()){
+            usernameDupliCheck.checkExists();
+        }
+    });
+
+    $("#email").blur(function (event){
+        if(emailInputCheck.checkValid()){
+            emailDupliCheck.checkExists();
+        }
+    });
+
+    //성공해도 출력 X
+    $("#password").blur(function (event){
+        if(passwordInputCheck.checkValid()){
+        }
+    });
+
+</script>
+
+</html>
+

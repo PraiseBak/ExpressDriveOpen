@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+<head>
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <h2>글 작성</h2>
+
+        <div class="form-group" id="post-area">
+            <input type="number" value="1" name="mode" hidden>
+            <label for="post-title">제목</label>
+            <input  th:value="${post?.title}" type="text" minlength="2" maxlength="40" class="form-control" name="title" id="post-title" placeholder="제목을 작성해주세요">
+            <div class="row ml-2">
+                <p id="cur-post-size-title">0</p>
+                <p class="text-right" id="max-post-size-title">/ 40</p>
+            </div>
+
+            <label for="post-content" class="float-left">내용</label>
+
+            <textarea th:text="${post?.content}" type="text" minlength="2" maxlength="1000" class="form-control" name="content" id="post-content" placeholder="내용을 작성해주세요"></textarea>
+
+            <div class="row ml-2">
+                <p class="post-size" id="cur-post-size-content">0</p>
+                <p class="text-right" id="max-post-size-content">/ 1000</p>
+            </div>
+
+            <div>
+                <label for="file-upload" class="custom-file-upload">
+                    <a class="btn btn-dark mt-2">이미지 넣기<i class="far fa-file-image ml-2"></i></a>
+                </label>
+                <input id="file-upload" type="file" style="display: none">
+            </div>
+
+            <button th:if="${post == null}" th:onclick="|traceWrite.write(1)|">Post 제출</button>
+            <button th:unless="${post == null}" th:onclick="|traceWrite.write(1,${post.id})|">Post 수정</button>
+        </div>
+
+        <p id="print-result-area"></p>
+    </div>
+
+
+<!--    <p>추천 글</p>-->
+</body>
+
+<script src="/js/Trace/TraceDatepicker.js"></script>
+<script src="/js/Front/TraceWriteFront.js"></script>
+<script src="/js/User/Interest.js"></script>
+<script th:inline="javascript">
+    let traceWrite;
+    let changeInputMode;
+</script>
+
+<script src="/Index/IndexTraceWrite.bundle.js"></script>
+
+</html>

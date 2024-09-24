@@ -1,0 +1,10 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=expressdrive'
+      - 'MYSQL_PASSWORD='
+      - 'MYSQL_ROOT_PASSWORD='
+      - 'MYSQL_USER='
+    ports:
+      - '3306:3306'

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+
+<body>
+    <div class="jumbotron text-center">
+        <h5>Express Drive</h5>
+        <a href="/user/trace">Express Drive와 더 나은 하루 시작하기</a>
+    </div>
+
+    <div class="jumbotron text-center">
+        <h5>커뮤니티</h5>
+
+        <div id="community-list" th:each="community : ${communityList}">
+            <a th:href="|/community/${community.getUrl()}|" th:text="${community.getName()}"></a>
+        </div>
+        <!-- 커뮤니티 리스트  더보기 눌러서 다른 url로가서 커뮤니티 리스트 볼 수 있다-->
+
+    </div>
+
+</body>
+</html>

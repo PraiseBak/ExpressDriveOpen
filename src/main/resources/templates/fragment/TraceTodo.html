@@ -1,0 +1,304 @@
+<div>
+
+    <div class="todo-list row" th:fragment="traceTodo(isChecked)">
+
+        <div class="text-center col-sm-12 mt-4 checked" th:if="${isChecked}" style="display: none">
+            <h2 class="col-sm-12 text-center header-unchecked mt-lg-4">성공한 Todo</h2>
+        </div>
+
+        <!--T0DO 부분-->
+        <!--        성공한 todo면 hide인것만 안보여주면되지만 일반 todo는 hide인것과 성공한 것 모두 안보여준다-->
+        <div th:class="|todo-area col-sm-4 bg-gray-900 text-white border rounded mt-4 pt-4 pb-2 ${isChecked == 1 ? 'checked' : ''}|"
+             th:each="todo:  ${todos}"
+             th:if="${isChecked == 1 ? !todo.getHide() && todo.getChecked() : (!todo.getHide() && !todo.getChecked())}"
+             th:style="|${isChecked == 1 ? 'display:none;' : ''} height: auto;min-height: 300px|">
+
+            <div class="col-sm-12 text-center">
+                <button class="btn btn-light"
+                        th:if="${todo.checked == false && todo.deleted == false}"
+                        th:onclick="checkTodo()" data-toggle="modal"
+                        th:data-target="'#myModal-' + ${todo.id}">TODO 성공 설정하기
+                </button>
+            </div>
+
+            <div class="row text-center" th:id="|todo-front-${todo.id}|">
+                <div class="col-sm-1">
+                </div>
+
+                <div class="col-sm-10 trace-content">
+                    <small class="" th:if="${todo.until}"
+                           th:text="|📅 ${todo.leftDate > '0' ? todo.leftDate+' 일 남음' : '목표일 달성!'}|">
+                    </small>
+                    <small class="" th:unless="${todo.until}"
+                           th:text="|📅 목표일 달성!|">
+                    </small>
+
+                    <div th:if="${todo.content.length() > 100}">
+                                    <pre class="text-white" th:id="'t-' + ${todo.id}+'-content'"
+                                         th:text="${#strings.substring(todo.content, 0, 100)}"></pre>
+                        <p hidden="" th:id="|t-full-text-${todo.id}|" th:text="${todo.content}"></p>
+
+                        <a th:id="|view-more-${todo.id}|" class="float-right mb-2"
+                           th:onclick="|viewMore(${todo.id},'t')|" role="button">
+                            <i class='fas fa-sort-down text-gray-400'> 더보기</i>
+                        </a>
+                    </div>
+
+                    <div th:unless="${todo.content.length() > 100}">
+                        <pre class="text-white" th:unless="${todo.content.length() > 100}"
+                             th:id="'t-' + ${todo.id}+'-content'" th:text="${todo.content}"></pre>
+                    </div>
+
+                    <!-- Todo Elem 부분 -->
+                    <div th:each="todoElem : ${todo.todoElemList}">
+                        <div th:onclick="|${owner == #authentication.name} ? check(${todoElem.id}) : ''|"
+                             class="text-left row" style="cursor: pointer;">
+                            <div class="col-sm-1">
+                                <input th:if="${todoElem.isChecked == true}" type="checkbox" class="custom-checkbox"
+                                       checked="checked" th:id="|todoElem-check-${todoElem.id}|" onclick="return false">
+                                <input th:unless="${todoElem.isChecked == true}" type="checkbox" class="custom-checkbox"
+                                       th:id="|todoElem-check-${todoElem.id}|" onclick="return false">
+                            </div>
+                            <div class="col-sm-11">
+                                <p th:id="|todoElem-${todoElem.id}|" th:text="${todoElem.todoElemContent}"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <img th:if="${todo.imgSrc}" th:src="|/get.cf?fileName=${todo.imgSrc}|">
+                </div>
+
+                <!-- modal -->
+                <div class="col-sm-1" th:if="${owner == #authentication.name && !todo.getHide()}">
+                    <div class="align-items-center justify-content-between ">
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                 aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">수정</div>
+                                <!--                                <button class="dropdown-item"-->
+                                <!--                                        th:onclick="|location.href='@{/user/trace/update(mode=0,id=${todo.id})}'|">-->
+                                <!--                                    내용 수정하기-->
+                                <!--                                </button>-->
+                                <button class="dropdown-item"
+                                        th:onclick="|updateToggle(${todo.id})|">
+                                    내용 수정하기
+                                </button>
+                                <button class="dropdown-item" data-toggle="modal"
+                                        th:data-target="'#myModal-' + ${todo.id}">TODO 실패 설정하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Modal -->
+                    <div class="modal fade text-dark" th:id="'myModal-' + ${todo.id}">
+                        <div class="modal-dialog">
+                            <div class="modal-content text-dark">
+                                <!-- Modal Header -->
+                                <div class="modal-header">
+                                    <h4 class="modal-title"
+                                        th:text="${todo.getDeleted() ? '삭제' : '성공,실패 사유'}"></h4>
+                                    <button type="button" class="close" data-dismiss="modal">&times;
+                                    </button>
+                                </div>
+
+                                <!-- Modal body -->
+                                <div class="modal-body" th:if="${!todo.getDeleted()}">
+                                    <input type="text" minlength="2" maxlength="100" class="form-control"
+                                           th:id="'todo-modal-' + ${todo.id}"
+                                           placeholder="성공,실패 사유를 입력해주세요">
+                                </div>
+
+                                <!-- Modal footer -->
+                                <div class="modal-footer">
+                                    <button type="button" th:if="${!todo.getDeleted()}"
+                                            th:onclick="'updateModeSelect(' + ${todo.id} + ')'"
+                                            class="btn btn-dark" data-dismiss="modal">원인 기록하기
+                                    </button>
+                                    <button type="button"
+                                            th:onclick="'traceRemoveIndex.remove(-1,' + ${todo.id} +')'"
+                                            class="btn btn-dark" data-dismiss="modal">삭제할래요(되돌릴 수 없습니다)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- The Modal End -->
+
+                </div>
+
+
+                <div th:class="|col-sm-12 text-center align-text-bottom border-bottom-0 align-bottom todo-interest-${todo.id}|">
+                    <button th:each="todoInterest : ${todo.getInterests()}" class="btn btn-light ml-2 mb-2 mt-3"
+                            style="bottom: 0"
+                            th:text="${todoInterest.getInterest().getStr()}"></button>
+                </div>
+
+
+            </div>
+
+
+            <!-- Todo 수정부분 -->
+            <div class="text-center input-area mb-4" th:id="|todo-modify-${todo.id}|" style="display: none">
+                <div class="row">
+                    <div class="inputs col-sm-12">
+                        <div class="datepicker-area col-sm-12">
+                            <label th:for="|datepicker-${todo.id}|" class="custom-file-upload">
+                                <button class="btn btn-dark" th:onclick="|showDatepicker(${todo.id})|">📅</button>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12">
+                        <div class="datepicker-area col-sm-12">
+                            <input class="form-control" name="until" th:id="|datepicker-${todo.id}|"
+                                   style="display: none">
+                            <label th:for="|content-${todo.id}|">Todo 제목</label>
+                            <input class="form-control" th:id="|content-${todo.id}|" name="content"
+                                   th:value="${todo.content}">
+                            <hr>
+                        </div>
+                    </div>
+                    <label class="text-center col-sm-12">Todo 항목</label>
+
+                    <div th:class="|todoElemParent-${todo.id} col-sm-12|">
+                        <div th:each="todoElem : ${todo.todoElemList}" th:class="|col-sm-12 mt-2|">
+                            <div class="text-left" style="cursor: pointer;">
+                                <input name="todoElem" th:class="|form-control todoElem-${todo.id}|"
+                                       th:id="|todoElem-${todoElem.id}|" th:value="${todoElem.todoElemContent}">
+                                <button id="deleteBtn" class="btn btn-dark position-absolute"
+                                        th:onclick="|deleteTodoElem(this.parentNode)|" style="right: 4px;top: 0">✖
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="float-right mt-4 mr-4">
+                    <label th:for="|file-upload-${todo.id}|" class="custom-file-upload mr-2">
+                        <a class="btn btn-dark"><i class="far fa-file-image"></i></a>
+                    </label>
+                    <input th:id="|file-upload-${todo.id}|" type="file" style="display: none">
+                    <button th:onclick="|addTodoElem('.todoElemParent-${todo.id}',${todo.id})|"
+                            class="float-right btn btn-dark text-right">➕
+                    </button>
+                </div>
+
+                <br><br><br>
+
+                <div class="interest-select">
+                    <select id="interest-select" name="interests" th:onchange="|interestAddManage(this,${todo.id})|">
+                        <option value="-1">관심사 선택</option>
+                        <div th:each="interest : ${interestEnumList}">
+                            <option th:value="${interest.code}" th:text="${interest.str}"></option>
+                        </div>
+                    </select>
+                </div>
+
+                <div class="interest-area mt-4" th:id="|interest-area-${todo.id}|">
+                </div>
+
+                <button type="button" class="btn btn-dark text-center mt-4" th:onclick="|todoSubmit(${todo.id},true)|">
+                    todo 수정하기
+                </button>
+
+                <button type="button" class="btn btn-dark text-center mt-4" th:onclick="|updateToggle(${todo.id})|">취소
+                </button>
+
+            </div>
+            <!-- Todo 수정부분 끝--></div>
+
+        <!-- Todo 새로 만들기 -->
+        <!--        성공한 Todo에서 새로 만들 필요는 없으니까-->
+        <div th:if="${isChecked == 0 && owner == #authentication.getName()}" class="card todo-area col-sm-4 bg-gray-900 text-white border rounded mt-4 pt-4"
+             style="height: auto; min-height: 300px">
+            <form id="todo-form" method="post" action="/API/trace/" onsubmit="return false">
+                <input type="hidden" name="mode" value=0>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <div class="trace-content text-center row">
+
+                    <a onclick="toggleTodoInput()" id="new-todo-btn"
+                       class="text-white stretched-link new-todo-btn text-center col-sm-12">새 Todo 만들기</a>
+
+                    <div class="input-area mb-4" id="new-todo-area" style="display: none">
+                        <div class="row">
+                            <div class="inputs col-sm-12">
+                                <div class="datepicker-area col-sm-12">
+                                    <label for="datepicker-0" class="custom-file-upload">
+                                        <button class="btn btn-dark" onclick="showDatepicker(0)">📅</button>
+                                    </label>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12">
+                                <div class="datepicker-area col-sm-12">
+                                    <input class="form-control" name="until" id="datepicker-0" style="display: none">
+                                    <label for="content">Todo 제목</label>
+                                    <input class="form-control" id="content-0" name="content">
+                                    <hr>
+                                </div>
+                            </div>
+                            <label class="text-center col-sm-12">Todo 항목</label>
+                            <div class="col-sm-12" id="datepicker-parent-0">
+                                <div class="datepicker-area col-sm-auto" id="todoElemArea-0">
+                                    <input name="todoElem" th:class="|todoElem-0 form-control|" id="todoElem-0">
+                                    <button id="deleteBtn" class="btn btn-dark position-absolute"
+                                            onclick="deleteTodoElem(this.parentNode)" style="right: 4px;top: 0">✖
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="float-right mt-4 mr-4">
+                            <label for="file-upload-0" class="custom-file-upload mr-2">
+                                <a class="btn btn-dark"><i class="far fa-file-image"></i></a>
+                            </label>
+
+                            <input id="file-upload-0" type="file" style="display: none">
+                            <button onclick="addTodoElem('#datepicker-parent-0',0)"
+                                    class="float-right btn btn-dark text-right">➕
+                            </button>
+                        </div>
+
+                        <br><br><br>
+
+                        <div class="interest-select">
+                            <select id="interest-select-0" name="interests" onchange="interestAddManage(this,0)">
+                                <option value="-1">관심사 선택</option>
+                                <div th:each="interest : ${interestEnumList}">
+                                    <option th:value="${interest.code}" th:text="${interest.str}"></option>
+                                </div>
+                            </select>
+                        </div>
+
+                        <div class="interest-area mt-4" id="interest-area-0">
+                        </div>
+
+                        <button type="button" class="btn btn-dark text-center mt-4" th:onclick="todoSubmit(0)">todo 추가하기
+                        </button>
+
+                        <button type="button" onclick="todoAddCancel()" id="todo-add-cancel-btn"
+                                class="btn btn-dark text-center mt-4">취소
+                        </button>
+
+
+                    </div>
+
+                </div>
+            </form>
+
+
+        </div>
+        <hr>
+    </div>
+
+
+
+
+</div>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+
+<body>
+    <input type="hidden"  th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <form method="get">
+        <label for="username">검색할 유저네임</label>
+        <input type="text" class="form-control" name="requestUsername" id="username" aria-describedby="유저네임">
+        <input type="text" name="page" th:value="${page}" hidden>
+        <button onclick="pageUpdate(2)">검색</button>
+
+        <div class="form-group">
+            <div id="username-area">
+            </div>
+
+            <h3>유저 내역</h3>
+            <div th:each="username : ${usernameList}">
+                <a th:href="@{|/user/trace/${username}|}" th:text="${username}"></a>
+            </div>
+
+            <!--/*@thymesVar id="error" type="com.pb.expressdrive.Helper.Error.InternalServerError"*/-->
+            <p th:if="${error}" id="errorMsg" th:text="${error?.getMessage()}"></p>
+        </div>
+
+        <button onclick="pageUpdate(0)">이전 페이지</button>
+        <button onclick="pageUpdate(1)">다음 페이지</button>
+    </form>
+
+</body>
+<script>
+    function pageUpdate(mode){
+        let val = Number($("input[name='page']").val());
+        console.log(val);
+        if(mode == 0){
+            $("input[name='page']").val(val-1);
+        }else if(mode == 1){
+            $("input[name='page']").val(val+1);
+        }else{
+            $("input[name='page']").val(1);
+        }
+
+    }
+</script>
+</html>
+

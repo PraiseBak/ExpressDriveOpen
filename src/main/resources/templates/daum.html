@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--<head th:replace="header.html">-->
+<!--</head>-->
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js" integrity="sha384-qlmct0AOBiA2VPZkMY3+2WqkHtIQ9lSdAsAn5RUJD/3vA5MKDgSGcdmIv4ycVxyn" crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <h2>글 작성</h2>
+
+    <!-- 에디터 시작 -->
+    <div>
+        <form name="frm" id="frm" action="/" method="post" accept-charset="utf-8">
+            <input type="hidden"  th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <!-- 에디터프레임호출 영역 -->
+            <div id="editor_frame"></div>
+            <!-- 실제 값이 담겨져서 넘어갈 textarea 태그 -->
+            <textarea name="text" id="daumeditor" rows="10" cols="100" style="width:766px; height:412px;display: none;"></textarea>
+            <input type="button" id="save_button" value="내용전송"/>
+        </form>
+    </div>
+
+    <!-- 에디터 끝 -->
+
+    <!--  <div class="form-group" id="post-area"n>-->
+    <!--    <label for="post-title">제목</label>-->
+    <!--    <input  th:value="${post?.title}" type="text" minlength="2" maxlength="40" class="form-control" name="title" id="post-title" placeholder="제목을 작성해주세요">-->
+    <!--    <div class="row ml-2">-->
+    <!--      <p id="cur-post-size-title">0</p>-->
+    <!--      <p class="text-right" id="max-post-size-title">/ 40</p>-->
+    <!--    </div>-->
+
+    <!--    <div class="row ml-2">-->
+    <!--      <p class="post-size" id="cur-post-size-content">0</p>-->
+    <!--      <p class="text-right" id="max-post-size-content">/ 1000</p>-->
+    <!--    </div>-->
+
+    <!--    <button th:if="${post == null}" th:onclick="|traceWrite.write(1)|">Post 제출</button>-->
+    <!--    <button th:unless="${post == null}" th:onclick="|traceWrite.write(1,${post.id})|">Post 수정</button>-->
+    <!--  </div>-->
+
+    <p id="print-result-area"></p>
+</div>
+
+
+<!--    <p>추천 글</p>-->
+<link rel="stylesheet" href="/daumeditor/css/editor.css" type="text/css" charset="utf-8"/>
+<script src="/daumeditor/js/editor_loader.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/daum.js" type="text/javascript" charset="utf-8"></script>
+</body>
+
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
+<div class="container">
+
+    <h2 th:text="${community.name}"></h2>
+    <div class="body-container row">
+
+        <table class="table table-bordered" th:if="${boardList}">
+            <thead>
+            <tr role="row">
+                <th>제목</th>
+                <th>유저</th>
+                <th>작성시기</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="board : ${boardList}">
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${board.getTitle()}"></p></td>
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${board.getUsername()}"></p></td>
+                <td th:value="${board.getId()}" class="redirect-td"><p th:text="${#temporals.format(board.modifiedDate, 'yyyy-MM-dd')}"></p></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <ul class="pagination justify-content-center"><li th:each="btn : ${pageBtnList}" class="page-item"><a class="page-link bg-dark text-white"  th:onclick="|paging(${btn})|" th:text="${btn}"></a></li></ul>
+    <a class="btn btn-dark" th:href="|/community/${community.getUrl()}/write|">글쓰기</a>
+
+    <script th:inline="javascript">
+        var community = /*[[${community.getUrl()}]]*/;
+        function paging(btn){
+            location.href = location.href.split("?")[0] + `?page=${btn}`;
+        }
+
+        let redirectTds = $(".redirect-td");
+        for (const redirectTd of redirectTds) {
+            let boardId = redirectTd.getAttribute("value");
+            redirectTd.onclick = function (e){
+                location.href = `/community/${community}/${boardId}`;
+            }
+            redirectTds.css("cursor","pointer");
+        }
+    </script>
+
+</div>
+
+</html>

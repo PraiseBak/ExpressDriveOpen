@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="header.html">
+</head>
+<head>
+    <link rel="stylesheet" href="/js/calendar-heatmap-mini/src/calendar-heatmap-mini.css">
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.js"></script>
+
+    <script>
+        let following;
+        let traceCheck;
+        let editProfileIndex;
+        let commentEditFrontIndex;
+        let commentIndex;
+        let editProfileFrontIndex;
+        let traceRemoveIndex;
+    </script>
+
+    <script src="/js/bundle/index.bundle.js"></script>
+
+</head>
+
+<body class="vsc-initialized">
+<div class="container-fluid">
+    <div class="row mt-4">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10 profile border rounded">
+            <!-- 프로필 -->
+            <div class="row mt-4">
+                <div class="col-sm-2 profile-img text-dark rounded">
+                    <img id="profile-img" class="card-img-top rounded-circle mt-5" style="width: 200px;height: 200px;"
+                         th:src="|/get.cf?fileName=${userProfileImgSrc}|">
+
+                    <div id="img-send-area">
+                        <label for="file-upload" class="custom-file-upload">
+                            <img id="img-add-btn" class="card-img-top rounded-circle mt-5 text-center"
+                                 style="display:none; width: 30px;height: 30px;top: 43%;left: 50%;transform: translate(-50%, -50%);position: absolute;"
+                                 src="/get.cf?fileName=plus.jpg">
+                        </label>
+                        <input id="file-upload" type="file" style="display: none">
+                    </div>
+
+                    <h2 th:text="${owner}"></h2>
+
+                    <div th:if="${owner != #authentication.name} " class=" text-center">
+                        <button th:class="'btn ' + ${isFollowedUser == true ? 'btn-dark' : ''} + ' border'"
+                                id="following-btn" th:onclick="following(this.value,[[${owner}]])"
+                                th:text="'♥ 팔로워 ' + ${followedCount}"
+                                th:value="${isFollowedUser == true ? 0 : 1}" title="팔로우 수"></button>
+                    </div>
+                    <div class="ml-1" th:if="${owner == #authentication.name}">
+                        <button class="btn btn-dark border" onclick="location.href='trace/dashboard'"
+                                th:if="${owner == #authentication.name}">Todo 개요보기
+                        </button>
+                        <button class="btn btn-dark border" onclick="editProfileFrontIndex.toggleEdit()"
+                                th:if="${owner == #authentication.name}">프로필 수정하기
+                        </button>
+
+                        <div class="row"></div>
+                        <div style="display:inline;">
+                            <span class="" style="font-size: 28px;">♥</span>
+                            <p disabled style="display:inline;" id="following-btn2" th:text="'' + ${followedCount}"
+                               title="팔로우 수"></p>
+                        </div>
+
+                        <div style="display:inline;">
+                            <span class="" style="font-size: 28px;">✔</span>
+                            <p disabled style="display:inline;" id="checked-todo" th:text="'' + ${checkedTodoCount}"
+                               title="성공한 Todo 개수"></p>
+                        </div>
+
+                    </div>
+                    <!-- 외부링크 -->
+                    <div id="external-l ink">
+                        <div class="row ml-1">
+
+                            <div th:if="${linkA != null && linkA != ''}" id="linkA-text">
+                                <span class="col-sm-1">🔗</span>
+                                <a th:href="'https://' + ${linkA}" th:text="${linkA}"
+                                   style="text-decoration-line: none;color: black"></a>
+                            </div>
+                            <div class="input-group mt-2 mb-2" style="display: none" id="linkA-input-area">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">🔗</div>
+                                </div>
+                                <input type="text" id="linkA-input" class="form-control" th:value="${linkA}"
+                                       placeholder="자신을 표현할 링크1">
+                            </div>
+                        </div>
+
+                        <div class="row ml-1">
+                            <div th:if="${linkB != null && linkB != ''}" id="linkB-text">
+                                <span class="col-sm-1">🔗</span>
+                                <a th:href="'https://' + ${linkB}" th:text="${linkB}"
+                                   style="text-decoration-line: none;color: black"></a>
+                            </div>
+
+                            <div class="input-group mt-2 mb-2" style="display: none" id="linkB-input-area">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">🔗</div>
+                                </div>
+                                <input type="text" id="linkB-input" class="form-control" th:value="${linkB}"
+                                       placeholder="자신을 표현할 링크2">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 히트맵 -->
+                <div class="col-sm-10 profile-info bg-light text-dark rounded mt-4">
+                    <div id="edit-btn" class="mt-2"></div>
+                    <h5>info</h5>
+                    <div id="profile-info" style="height: auto;" class="mt4-">
+                        <p id="profile-text" th:text="${info}"></p>
+                    </div>
+
+                    <h5>heatmap</h5>
+                    <div id="heatmap" class="col-sm-auto border rounded"
+                         style="width: 1200px; position:relative; text-align:center; display:block;"></div>
+
+                </div>
+
+            </div>
+            <div id="interests" class="mt-2 mr-2">
+                <h5>Category</h5>
+                <button th:each="interest : ${interestList}" class="btn btn-dark ml-2" th:text="${interest}"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!--게시글 표시-->
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10 bg-light text-dark rounded mt-4 ">
+            <!-- Todo 부분 -->
+
+
+            <div class="text-center col-sm-12 mt-4">
+                <button class="btn btn-lg btn-dark" onclick="showCheckedTodo()">성공한 Todo 토글</button>
+            </div>
+
+
+            <div th:replace="fragment/TraceTodo :: traceTodo(1)"></div>
+
+
+
+            <div class="text-center col-sm-12 mt-4">
+                <h2 class="col-sm-12 text-center header-unchecked mt-lg-4">Todo</h2>
+            </div>
+
+            <div th:replace="fragment/TraceTodo :: traceTodo(0)"></div>
+
+
+
+
+            <!-- 작성글 -->
+                <div th:replace="fragment/TracePost"></div>
+
+            <div th:if="${owner == #authentication.name}">
+                <div class="trace-modify-area text-right row mt-4">
+                    <div class="col-sm-10"></div>
+                    <button class="btn btn-dark ml-4 mb-4" onclick="location.href='trace/write'">기록 더하기</button>
+                </div>
+            </div>
+
+            <h2>댓글</h2>
+
+            <!-- 댓글 출력 -->
+            <div class="comment-area">
+                <div class="row" th:each="comment : ${commentList}" th:id="|comment-area-${comment.id}|">
+                    <div class="col-sm-1">
+                        <img class="card-img-top rounded-circle" style="width: 50px;height: 50px;"
+                             th:src="'/get.cf?fileName=' + ${comment.getWriteUserProfileImgSrc() == null ? 'default-profile.jpg' : comment.getWriteUserProfileImgSrc() } ">
+                    </div>
+                    <div class="col-sm-10 row">
+                        <a class="col-sm-1 text-dark" th:href="|/user/trace/${comment.writeUsername}|"
+                           th:text="${comment.writeUsername}"></a>
+                        <div class="col-sm-11"></div>
+                        <div class="col-sm-12" th:id="|comment-text-area-${comment.id}|">
+                            <p th:text="${comment.text}" th:id="|comment-text-${comment.id}|"></p>
+                        </div>
+                    </div>
+
+                    <div th:id="|comment-edit-btn-${comment.id}|"></div>
+
+                    <!-- 수정 버튼 -->
+                    <div class="col-sm-1">
+                        <div th:id="|edit-btn-${comment.id}|"
+                             th:if="${(comment.writeUsername == #authentication.name) || (comment.pageOwnerUsername == #authentication.name)} ">
+                            <div class=" align-items-center justify-content-between">
+                                <div class="dropdown no-arrow">
+                                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                         aria-labelledby="dropdownMenuLink">
+                                        <div class="dropdown-header">수정</div>
+                                        <button class="dropdown-item"
+                                                th:onclick="|commentEditFrontIndex.toggleEdit(${comment.id})|">댓글 수정하기
+                                        </button>
+                                        <button class="dropdown-item" th:onclick="|commentIndex.delete(${comment.id})|">
+                                            댓글 삭제하기
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- 댓글 작성 -->
+            <div class="comment-write-area mt-4">
+                <div class="form-group" id="todo-area">
+                    <textarea type="text" minlength="2" maxlength="1000" class="form-control" name="content"
+                              id="comment-text" placeholder="댓글을 작성해주세요"></textarea>
+                    <div id="text-limit-view" class="row ml-3">
+                        <p class="float-left" id="cur-text-size">0</p>
+                        <p class="float-left text-right" id="max-text-size">/ 1000</p>
+                    </div>
+                    <button class="btn btn-dark float-right" onclick="commentIndex.add()">댓글 작성</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sm-1"></div>
+
+        <div class="col-sm-1"></div>
+        <div class="recommended-area text-center mt-5 col-sm-10 bg-light text-dark rounded">
+            <h2>추천 유저</h2>
+            <div th:each="recommendUser : ${recommendedUsers}">
+                <a th:text="${recommendUser.username}" th:href='@{|/user/trace/${recommendUser.username}|}'></a>
+            </div>
+        </div>
+        <div class="mt-4"></div>
+    </div>
+    <p class="text-center" id="print-result-area"></p>
+    <br>
+</div>
+</body>
+
+
+<script src="/js/calendar-heatmap-mini/src/calendar-heatmap-mini.js"></script>
+
+<script th:inline="javascript">
+    let traceHeatmapList = [[${traceHeatmapList}]];
+    let pageOwnerUsername = [[${owner}]];
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.10.0/d3.js"></script>
+<script type="module" src="/js/Trace/heatmap.js"></script>
+<script src="/js/Front/TraceFront.js"></script>
+<script src="/js/Front/TraceTodoFront.js"></script>
+<script src="/js/Trace/TraceTodo.js"></script>
+<script src="/js/Trace/TraceDatepicker.js"></script>
+<script src="/js/User/Interest.js"></script>
+<script>
+    function showDatepicker(id) {
+        $("#datepicker-" + id).datepicker({
+            dateFormat: 'yy-mm-dd',
+            prevText: '이전 달',
+            nextText: '다음 달',
+            monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+            monthNamesShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+            dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+            dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+            dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'],
+            showMonthAfterYear: true,
+            yearSuffix: '년'
+        });
+
+        $("#datepicker-" + id).datepicker('show')
+    }
+</script>
+
+</html>
